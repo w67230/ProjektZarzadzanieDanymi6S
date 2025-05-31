@@ -18,17 +18,19 @@ import java.util.List;
 @RestController
 public class BookController implements JsonSerializer<Book> {
 
+    private static final File ITEM_FILE = JsonHelper.BOOK_JSON;
+
     @PostMapping("/book")
     public ResponseEntity<String> createBook(String name, Integer authorId) {
         try {
-            if(name.isEmpty() || authorId == null){
+            if(name == null || authorId == null){
                 return ResponseEntity.badRequest().body("Name and authorId cannot be null");
             }
 
             ArrayList<Book> list = new ArrayList<>(this.readFromFile());
             int id = !list.isEmpty() ? list.get(list.size()-1).id() + 1 : 1;
             list.add(new Book(id, name, authorId));
-            this.writeToFile(JsonHelper.BOOK_JSON, list);
+            this.writeToFile(list);
             return ResponseEntity.ok("Book was successfully created");
         } catch (Exception e) {
             throw new RuntimeException("Create operation failed: ", e);
@@ -60,19 +62,19 @@ public class BookController implements JsonSerializer<Book> {
             boolean bl = list.removeIf(book -> {
                 return book.id() == id;
             });
-            this.writeToFile(JsonHelper.BOOK_JSON, list);
+            this.writeToFile(list);
             return bl ? ResponseEntity.ok("Book was successfully deleted") : ResponseEntity.badRequest().body("Book with following id: " + id + " was not found");
         } catch (Exception e) {
             throw new RuntimeException("Delete operation failed: ", e);
         }
     }
 
-    public void writeToFile(File file, List<Book> itemList) throws IOException {
-        JsonHelper.MAPPER.writerWithDefaultPrettyPrinter().writeValue(JsonHelper.BOOK_JSON, itemList);
+    public void writeToFile(List<Book> itemList) throws IOException {
+        JsonHelper.MAPPER.writerWithDefaultPrettyPrinter().writeValue(ITEM_FILE, itemList);
     }
 
     public List<Book> readFromFile() throws IOException {
-        return List.of(JsonHelper.MAPPER.readValue(JsonHelper.BOOK_JSON, Book[].class));
+        return List.of(JsonHelper.MAPPER.readValue(ITEM_FILE, Book[].class));
     }
 
 }
