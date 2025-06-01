@@ -5,10 +5,7 @@ import net.fryc.items.Book;
 import net.fryc.json.JsonHelper;
 import net.fryc.json.JsonSerializer;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -66,6 +63,35 @@ public class BookController implements JsonSerializer<Book> {
             return bl ? ResponseEntity.ok("Book was successfully deleted") : ResponseEntity.badRequest().body("Book with following id: " + id + " was not found");
         } catch (Exception e) {
             throw new RuntimeException("Delete operation failed: ", e);
+        }
+    }
+
+    @PutMapping("/book")
+    public ResponseEntity<String> replaceBook(Integer id, String name, Integer authorId){
+        try {
+            if(id == null){
+                return ResponseEntity.badRequest().body("Book id cannot be null");
+            }
+
+            ArrayList<Book> list = new ArrayList<>(this.readFromFile());
+            boolean bl = false;
+            for(Book book : list){
+                if(book.id() == id){
+                    String rName = name == null ? book.name() : name;
+                    int rAuthor = authorId == null ? book.authorId() : authorId;
+                    list.set(list.indexOf(book), new Book(id, rName, rAuthor));
+                    bl = true;
+                    break;
+                }
+            }
+            if(bl){
+                this.writeToFile(list);
+                return ResponseEntity.ok("Book was successfully updated");
+            }
+
+            return ResponseEntity.badRequest().body("Book with following id: " + id + " was not found");
+        } catch (Exception e) {
+            throw new RuntimeException("Update operation failed: ", e);
         }
     }
 
