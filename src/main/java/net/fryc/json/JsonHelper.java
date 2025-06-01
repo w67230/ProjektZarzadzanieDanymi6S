@@ -16,6 +16,8 @@ public class JsonHelper {
     public static final File BOOK_JSON = fileWithDefaultPath("books.json", "[]");
     public static final File AUTHOR_JSON = fileWithDefaultPath("authors.json", "[]");
     public static final File USER_JSON = fileWithDefaultPath("users.json", "[]");
+    public static final File OFFER_JSON = fileWithDefaultPath("offers.json", "[]");
+    public static final File ORDER_JSON = fileWithDefaultPath("orders.json", "[]");
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
 
@@ -41,6 +43,9 @@ public class JsonHelper {
 
     }
 
+    /**
+     *  fileBeginning is used when file doesn't exist and needs to be created
+     */
     private static File fileWithDefaultPath(String name, String fileBeginning){
         File file = new File(JSON_FILES_PATH + "/" + name);
         ALL_FILES.put(file, fileBeginning);

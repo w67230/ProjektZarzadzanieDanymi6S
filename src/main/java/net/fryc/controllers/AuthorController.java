@@ -6,10 +6,7 @@ import net.fryc.json.JsonHelper;
 import net.fryc.json.JsonSerializer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -74,6 +71,38 @@ public class AuthorController implements JsonSerializer<Author> {
             return bl ? ResponseEntity.ok("Author was successfully deleted") : ResponseEntity.badRequest().body("Author with following id: " + id + " was not found");
         } catch (Exception e) {
             throw new RuntimeException("Delete operation failed: ", e);
+        }
+    }
+
+    @PutMapping("/author")
+    public ResponseEntity<String> replaceAuthor(Integer id, String firstName, String lastName, String birthDate, String deathDate){
+        try {
+            if(id == null){
+                return ResponseEntity.badRequest().body("Author id cannot be null");
+            }
+
+            ArrayList<Author> list = new ArrayList<>(this.readFromFile());
+            boolean bl = false;
+            for(Author author : list){
+                if(author.id() == id){
+                    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy:HH", Locale.ENGLISH);
+                    String fName = firstName == null ? author.firstName() : firstName;
+                    String lName = lastName == null ? author.lastName() : lastName;
+                    Date bDate = birthDate == null ? author.birthDate() : format.parse(birthDate+":12");
+                    Date dDate = deathDate == null ? author.deathDate() : format.parse(deathDate+":12");
+                    list.set(list.indexOf(author), new Author(id, fName, lName, bDate, dDate));
+                    bl = true;
+                    break;
+                }
+            }
+            if(bl){
+                this.writeToFile(list);
+                return ResponseEntity.ok("Author was successfully updated");
+            }
+
+            return ResponseEntity.badRequest().body("Author with following id: " + id + " was not found");
+        } catch (Exception e) {
+            throw new RuntimeException("Update operation failed: ", e);
         }
     }
 
