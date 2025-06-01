@@ -4,10 +4,7 @@ import net.fryc.items.User;
 import net.fryc.json.JsonHelper;
 import net.fryc.json.JsonSerializer;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,20 +35,16 @@ public class UserController implements JsonSerializer<User> {
         }
     }
 
-    /*
-    @GetMapping("/users")
-    public List<String> getAll() {
+    @GetMapping("/correctLogin")
+    public boolean isLoginCorrect(String login, String password) {
         try {
-            List<String> list = new ArrayList<>();
-            this.readFromFile().forEach(user -> {
-                list.add(user.login());
+            return this.readFromFile().stream().anyMatch(user -> {
+                return user.login().equals(login) && user.haslo().equals(password);
             });
-            return list;
         } catch (Exception e) {
             throw new RuntimeException("Get operation failed: ", e);
         }
     }
-     */
 
     @GetMapping("/user")
     public boolean get(String login) {
@@ -73,6 +66,38 @@ public class UserController implements JsonSerializer<User> {
             return bl ? ResponseEntity.ok("User was successfully deleted") : ResponseEntity.badRequest().body("User with following login: " + login + " was not found");
         } catch (Exception e) {
             throw new RuntimeException("Delete operation failed: ", e);
+        }
+    }
+
+    @PutMapping("/user")
+    public ResponseEntity<String> replaceUser(String login, String newLogin, String password){
+        try {
+            if(login == null){
+                return ResponseEntity.badRequest().body("Login cannot be null");
+            }
+            else if(this.readFromFile().stream().anyMatch(user -> user.login().equals(newLogin))){
+                return ResponseEntity.badRequest().body("New login is occupied");
+            }
+
+            ArrayList<User> list = new ArrayList<>(this.readFromFile());
+            boolean bl = false;
+            for(User user : list){
+                if(user.login().equals(login)){
+                    String rLogin = newLogin == null ? user.login() : newLogin;
+                    String rPass = password == null ? user.haslo() : password;
+                    list.set(list.indexOf(user), new User(rLogin, rPass));
+                    bl = true;
+                    break;
+                }
+            }
+            if(bl){
+                this.writeToFile(list);
+                return ResponseEntity.ok("User was successfully updated");
+            }
+
+            return ResponseEntity.badRequest().body("User with following login: " + login + " was not found");
+        } catch (Exception e) {
+            throw new RuntimeException("Update operation failed: ", e);
         }
     }
 
