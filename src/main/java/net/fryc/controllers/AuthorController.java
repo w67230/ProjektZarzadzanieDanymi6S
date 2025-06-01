@@ -31,9 +31,9 @@ public class AuthorController implements JsonSerializer<Author> {
                 return ResponseEntity.badRequest().body("First name, last name and birth date cannot be null");
             }
 
-            SimpleDateFormat format = new SimpleDateFormat("yyyy/MM/dd", Locale.ENGLISH);
-            Date bDate = format.parse(birthDate);// TODO daje o jeden dzien do tylu pewnie przez to ze czasu nie podaje
-            Date dDate = deathDate != null ? format.parse(deathDate) : null;
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy:HH", Locale.ENGLISH);
+            Date bDate = format.parse(birthDate+":12");
+            Date dDate = deathDate != null ? format.parse(deathDate+":12") : null;
 
             ArrayList<Author> list = new ArrayList<>(this.readFromFile());
             int id = !list.isEmpty() ? list.get(list.size()-1).id() + 1 : 1;
