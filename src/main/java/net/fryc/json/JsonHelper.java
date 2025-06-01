@@ -12,7 +12,7 @@ public class JsonHelper {
 
     private static final Map<File, String> ALL_FILES = new HashMap<>();
 
-    public static final File JSON_FILES_PATH = new File("C:/fryc_data");
+    public static final File JSON_FILES_PATH = new File(System.getProperty("user.home")+"/fryc_data");
     public static final File BOOK_JSON = fileWithDefaultPath("books.json", "[]");
     public static final File AUTHOR_JSON = fileWithDefaultPath("authors.json", "[]");
     public static final File USER_JSON = fileWithDefaultPath("users.json", "[]");
