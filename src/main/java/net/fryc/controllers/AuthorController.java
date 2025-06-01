@@ -67,8 +67,8 @@ public class AuthorController implements JsonSerializer<Author> {
     public ResponseEntity<String> deleteAuthor(int id) {
         try {
             ArrayList<Author> list = new ArrayList<>(this.readFromFile());
-            boolean bl = list.removeIf(book -> {
-                return book.id() == id;
+            boolean bl = list.removeIf(author -> {
+                return author.id() == id;
             });
             this.writeToFile(list);
             return bl ? ResponseEntity.ok("Author was successfully deleted") : ResponseEntity.badRequest().body("Author with following id: " + id + " was not found");

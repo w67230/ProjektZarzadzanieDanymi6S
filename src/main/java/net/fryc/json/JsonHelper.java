@@ -14,7 +14,8 @@ public class JsonHelper {
 
     public static final File JSON_FILES_PATH = new File("C:/fryc_data");
     public static final File BOOK_JSON = fileWithDefaultPath("books.json", "[]");
-    public static final File AUTHOR_JSON = fileWithDefaultPath("author.json", "[]");
+    public static final File AUTHOR_JSON = fileWithDefaultPath("authors.json", "[]");
+    public static final File USER_JSON = fileWithDefaultPath("users.json", "[]");
     public static final ObjectMapper MAPPER = new ObjectMapper();
 
 
@@ -40,9 +41,9 @@ public class JsonHelper {
 
     }
 
-    private static File fileWithDefaultPath(String name, String fileBeggining){
+    private static File fileWithDefaultPath(String name, String fileBeginning){
         File file = new File(JSON_FILES_PATH + "/" + name);
-        ALL_FILES.put(file, fileBeggining);
+        ALL_FILES.put(file, fileBeginning);
         return file;
     }
 }
