@@ -1,5 +1,6 @@
 package net.fryc.controllers;
 
+import net.fryc.items.Offer;
 import net.fryc.items.Order;
 import net.fryc.json.JsonHelper;
 import net.fryc.json.JsonSerializer;
@@ -17,11 +18,18 @@ public class OrderController implements JsonSerializer<Order> {
     private static final File ITEM_FILE = JsonHelper.ORDER_JSON;
 
     @PostMapping("/order")
-    public ResponseEntity<String> createOrder(@RequestParam(defaultValue = "") String userLogin, @RequestParam Integer offerId, @RequestParam Integer amount) {
+    public ResponseEntity<String> createOrder(@RequestParam(defaultValue = "") String userLogin, Integer offerId, Integer amount) {
         try {
             if(userLogin.isEmpty() || offerId == null || amount == null){
                 return ResponseEntity.badRequest().body("User login, offer id and amount cannot be null");
             }
+            ArrayList<Offer> offers = new ArrayList<>(getOfferFromFile());
+            Offer offer = offers.stream().filter(off -> off.id() == offerId).findFirst().orElse(null);
+            if(offer == null || offer.amount() < amount){
+                return ResponseEntity.badRequest().body("Trying to order more than we have!");
+            }
+            offers.set(offers.indexOf(offer), new Offer(offer.id(), offer.bookId(), offer.price(), offer.amount() - amount));
+            saveOfferToFile(offers);
 
             ArrayList<Order> list = new ArrayList<>(this.readFromFile());
             int id = !list.isEmpty() ? list.get(list.size()-1).id() + 1 : 1;
@@ -103,5 +111,13 @@ public class OrderController implements JsonSerializer<Order> {
 
     public List<Order> readFromFile() throws IOException {
         return List.of(JsonHelper.MAPPER.readValue(ITEM_FILE, Order[].class));
+    }
+
+    private static List<Offer> getOfferFromFile() throws IOException {
+        return List.of(JsonHelper.MAPPER.readValue(JsonHelper.OFFER_JSON, Offer[].class));
+    }
+
+    private static void saveOfferToFile(List<Offer> list) throws IOException {
+        JsonHelper.MAPPER.writerWithDefaultPrettyPrinter().writeValue(JsonHelper.OFFER_JSON, list);
     }
 }
