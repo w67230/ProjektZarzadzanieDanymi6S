@@ -45,7 +45,7 @@ public class OfferController implements JsonSerializer<Offer> {
 
 
     @GetMapping("/offer")
-    public Offer get(int id) {
+    public Offer get(@RequestParam(defaultValue = "1") int id) {
         try {
             return this.readFromFile().stream().filter(offer -> offer.id() == id).findFirst().orElse(null);
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class OfferController implements JsonSerializer<Offer> {
     }
 
     @DeleteMapping("/offer")
-    public ResponseEntity<String> deleteOffer(int id) {
+    public ResponseEntity<String> deleteOffer(@RequestParam(defaultValue = "1") int id) {
         try {
             ArrayList<Offer> list = new ArrayList<>(this.readFromFile());
             boolean bl = list.removeIf(offer -> {

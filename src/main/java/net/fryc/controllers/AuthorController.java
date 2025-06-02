@@ -22,10 +22,10 @@ public class AuthorController implements JsonSerializer<Author> {
     private static final File ITEM_FILE = JsonHelper.AUTHOR_JSON;
 
     @PostMapping("/author")
-    public ResponseEntity<String> createAuthor(String firstName, String lastName, String birthDate, @Nullable String deathDate) {
+    public ResponseEntity<String> createAuthor(@RequestParam(defaultValue = "") String firstName, @RequestParam(defaultValue = "") String lastName, @RequestParam(defaultValue = "") String birthDate, @Nullable String deathDate) {
         try {
-            if(firstName == null || lastName == null || birthDate == null){
-                return ResponseEntity.badRequest().body("First name, last name and birth date cannot be null");
+            if(firstName.isEmpty() || lastName.isEmpty() || birthDate.isEmpty()){
+                return ResponseEntity.badRequest().body("First name, last name and birth date cannot be empty");
             }
 
             SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy:HH", Locale.ENGLISH);
@@ -52,7 +52,7 @@ public class AuthorController implements JsonSerializer<Author> {
     }
 
     @GetMapping("/author")
-    public Author get(int id) {
+    public Author get(@RequestParam(defaultValue = "1") int id) {
         try {
             return this.readFromFile().stream().filter(author -> author.id() == id).findFirst().orElse(null);
         } catch (Exception e) {
@@ -61,7 +61,7 @@ public class AuthorController implements JsonSerializer<Author> {
     }
 
     @DeleteMapping("/author")
-    public ResponseEntity<String> deleteAuthor(int id) {
+    public ResponseEntity<String> deleteAuthor(@RequestParam(defaultValue = "1") int id) {
         try {
             ArrayList<Author> list = new ArrayList<>(this.readFromFile());
             boolean bl = list.removeIf(author -> {
@@ -75,7 +75,7 @@ public class AuthorController implements JsonSerializer<Author> {
     }
 
     @PutMapping("/author")
-    public ResponseEntity<String> replaceAuthor(Integer id, String firstName, String lastName, String birthDate, String deathDate){
+    public ResponseEntity<String> replaceAuthor(Integer id, @RequestParam(defaultValue = "") String firstName, @RequestParam(defaultValue = "") String lastName, @RequestParam(defaultValue = "") String birthDate, @Nullable String deathDate){
         try {
             if(id == null){
                 return ResponseEntity.badRequest().body("Author id cannot be null");
@@ -86,9 +86,9 @@ public class AuthorController implements JsonSerializer<Author> {
             for(Author author : list){
                 if(author.id() == id){
                     SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy:HH", Locale.ENGLISH);
-                    String fName = firstName == null ? author.firstName() : firstName;
-                    String lName = lastName == null ? author.lastName() : lastName;
-                    Date bDate = birthDate == null ? author.birthDate() : format.parse(birthDate+":12");
+                    String fName = firstName.isEmpty() ? author.firstName() : firstName;
+                    String lName = lastName.isEmpty() ? author.lastName() : lastName;
+                    Date bDate = birthDate.isEmpty() ? author.birthDate() : format.parse(birthDate+":12");
                     Date dDate = deathDate == null ? author.deathDate() : format.parse(deathDate+":12");
                     list.set(list.indexOf(author), new Author(id, fName, lName, bDate, dDate));
                     bl = true;

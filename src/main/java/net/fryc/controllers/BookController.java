@@ -18,9 +18,9 @@ public class BookController implements JsonSerializer<Book> {
     private static final File ITEM_FILE = JsonHelper.BOOK_JSON;
 
     @PostMapping("/book")
-    public ResponseEntity<String> createBook(String name, Integer authorId) {
+    public ResponseEntity<String> createBook(@RequestParam(defaultValue = "") String name, Integer authorId) {
         try {
-            if(name == null || authorId == null){
+            if(name.isEmpty() || authorId == null){
                 return ResponseEntity.badRequest().body("Name and authorId cannot be null");
             }
 
@@ -44,7 +44,7 @@ public class BookController implements JsonSerializer<Book> {
     }
 
     @GetMapping("/book")
-    public Book get(int id) {
+    public Book get(@RequestParam(defaultValue = "1") int id) {
         try {
             return this.readFromFile().stream().filter(book -> book.id() == id).findFirst().orElse(null);
         } catch (Exception e) {
@@ -53,7 +53,7 @@ public class BookController implements JsonSerializer<Book> {
     }
 
     @DeleteMapping("/book")
-    public ResponseEntity<String> deleteBook(int id) {
+    public ResponseEntity<String> deleteBook(@RequestParam(defaultValue = "1") int id) {
         try {
             ArrayList<Book> list = new ArrayList<>(this.readFromFile());
             boolean bl = list.removeIf(book -> {
@@ -67,7 +67,7 @@ public class BookController implements JsonSerializer<Book> {
     }
 
     @PutMapping("/book")
-    public ResponseEntity<String> replaceBook(Integer id, String name, Integer authorId){
+    public ResponseEntity<String> replaceBook(Integer id, @RequestParam(defaultValue = "") String name, Integer authorId){
         try {
             if(id == null){
                 return ResponseEntity.badRequest().body("Book id cannot be null");
@@ -77,7 +77,7 @@ public class BookController implements JsonSerializer<Book> {
             boolean bl = false;
             for(Book book : list){
                 if(book.id() == id){
-                    String rName = name == null ? book.name() : name;
+                    String rName = name.isEmpty() ? book.name() : name;
                     int rAuthor = authorId == null ? book.authorId() : authorId;
                     list.set(list.indexOf(book), new Book(id, rName, rAuthor));
                     bl = true;

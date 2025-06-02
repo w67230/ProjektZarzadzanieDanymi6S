@@ -17,9 +17,9 @@ public class OrderController implements JsonSerializer<Order> {
     private static final File ITEM_FILE = JsonHelper.ORDER_JSON;
 
     @PostMapping("/order")
-    public ResponseEntity<String> createOrder(String userLogin, Integer offerId, Integer amount) {
+    public ResponseEntity<String> createOrder(@RequestParam(defaultValue = "") String userLogin, @RequestParam Integer offerId, @RequestParam Integer amount) {
         try {
-            if(userLogin == null || offerId == null || amount == null){
+            if(userLogin.isEmpty() || offerId == null || amount == null){
                 return ResponseEntity.badRequest().body("User login, offer id and amount cannot be null");
             }
 
@@ -45,7 +45,7 @@ public class OrderController implements JsonSerializer<Order> {
 
 
     @GetMapping("/order")
-    public Order get(int id) {
+    public Order get(@RequestParam(defaultValue = "1") int id) {
         try {
             return this.readFromFile().stream().filter(order -> order.id() == id).findFirst().orElse(null);
         } catch (Exception e) {
@@ -54,7 +54,7 @@ public class OrderController implements JsonSerializer<Order> {
     }
 
     @DeleteMapping("/order")
-    public ResponseEntity<String> deleteOrder(int id) {
+    public ResponseEntity<String> deleteOrder(@RequestParam(defaultValue = "1") int id) {
         try {
             ArrayList<Order> list = new ArrayList<>(this.readFromFile());
             boolean bl = list.removeIf(order -> {
@@ -68,7 +68,7 @@ public class OrderController implements JsonSerializer<Order> {
     }
 
     @PutMapping("/order")
-    public ResponseEntity<String> replaceOrder(Integer id, String userLogin, Integer offerId, Integer amount){
+    public ResponseEntity<String> replaceOrder(Integer id, @RequestParam(defaultValue = "") String userLogin, Integer offerId, Integer amount){
         try {
             if(id == null){
                 return ResponseEntity.badRequest().body("Order id cannot be null");
@@ -78,7 +78,7 @@ public class OrderController implements JsonSerializer<Order> {
             boolean bl = false;
             for(Order order : list){
                 if(order.id() == id){
-                    String rLogin = userLogin == null ? order.userLogin() : userLogin;
+                    String rLogin = userLogin.isEmpty() ? order.userLogin() : userLogin;
                     int rOffer = offerId == null ? order.offerId() : offerId;
                     int rAmount = amount == null ? order.amount() : amount;
                     list.set(list.indexOf(order), new Order(id, rLogin, rOffer, rAmount));

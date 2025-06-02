@@ -17,10 +17,10 @@ public class UserController implements JsonSerializer<User> {
     private static final File ITEM_FILE = JsonHelper.USER_JSON;
 
     @PostMapping("/user")
-    public ResponseEntity<String> createUser(String login, String password) {
+    public ResponseEntity<String> createUser(@RequestParam(defaultValue = "") String login, @RequestParam(defaultValue = "") String password) {
         try {
-            if(login == null || password == null){
-                return ResponseEntity.badRequest().body("Login and password cannot be null");
+            if(login.isEmpty() || password.isEmpty()){
+                return ResponseEntity.badRequest().body("Login and password cannot be empty");
             }
 
             ArrayList<User> list = new ArrayList<>(this.readFromFile());
@@ -36,7 +36,7 @@ public class UserController implements JsonSerializer<User> {
     }
 
     @GetMapping("/correctLogin")
-    public boolean isLoginCorrect(String login, String password) {
+    public boolean isLoginCorrect(@RequestParam(defaultValue = "") String login, @RequestParam(defaultValue = "") String password) {
         try {
             return this.readFromFile().stream().anyMatch(user -> {
                 return user.login().equals(login) && user.haslo().equals(password);
@@ -47,7 +47,7 @@ public class UserController implements JsonSerializer<User> {
     }
 
     @GetMapping("/user")
-    public boolean get(String login) {
+    public boolean get(@RequestParam(defaultValue = "") String login) {
         try {
             return this.readFromFile().stream().anyMatch(user -> user.login().equals(login));
         } catch (Exception e) {
@@ -56,7 +56,7 @@ public class UserController implements JsonSerializer<User> {
     }
 
     @DeleteMapping("/user")
-    public ResponseEntity<String> deleteUser(String login) {
+    public ResponseEntity<String> deleteUser(@RequestParam(defaultValue = "") String login) {
         try {
             ArrayList<User> list = new ArrayList<>(this.readFromFile());
             boolean bl = list.removeIf(user -> {
@@ -70,10 +70,10 @@ public class UserController implements JsonSerializer<User> {
     }
 
     @PutMapping("/user")
-    public ResponseEntity<String> replaceUser(String login, String newLogin, String password){
+    public ResponseEntity<String> replaceUser(@RequestParam(defaultValue = "") String login, @RequestParam(defaultValue = "") String newLogin, @RequestParam(defaultValue = "") String password){
         try {
-            if(login == null){
-                return ResponseEntity.badRequest().body("Login cannot be null");
+            if(login.isEmpty()){
+                return ResponseEntity.badRequest().body("Login cannot be empty");
             }
             else if(this.readFromFile().stream().anyMatch(user -> user.login().equals(newLogin))){
                 return ResponseEntity.badRequest().body("New login is occupied");
@@ -83,8 +83,8 @@ public class UserController implements JsonSerializer<User> {
             boolean bl = false;
             for(User user : list){
                 if(user.login().equals(login)){
-                    String rLogin = newLogin == null ? user.login() : newLogin;
-                    String rPass = password == null ? user.haslo() : password;
+                    String rLogin = newLogin.isEmpty() ? user.login() : newLogin;
+                    String rPass = password.isEmpty() ? user.haslo() : password;
                     list.set(list.indexOf(user), new User(rLogin, rPass));
                     bl = true;
                     break;
